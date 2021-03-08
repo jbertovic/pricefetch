@@ -6,25 +6,10 @@ use std::time::{UNIX_EPOCH, Duration};
 extern crate clap;
 use clap::App;
 
-// /// Struct to contain CLI arguments and configuration 
-// #[derive(FromArgs)]
-// /// Fetch close history from Yahoo Finance API
-// struct PriceFetch {
-//     /// from date in format yyyy-mm-dd
-//     #[argh(positional)]
-//     from: String,
-//     /// define symbols to fetch
-//     #[argh(positional)]
-//     symbols: Vec<String>,
-// }
-
 fn main() {
 
-    let yaml = load_yaml!("app.yml");
-    let matches = App::from_yaml(yaml).get_matches();
-
-    let symbols: Vec<&str> = matches.values_of("symbols").unwrap().collect();
-    let from_date: DateTime<Utc> = date_parse(matches.value_of("from").unwrap()).unwrap();
+    let (from, symbols) = cli_args();
+    let from_date: DateTime<Utc> = date_parse(&from).unwrap();
     let to_date: DateTime<Utc> = Utc::now();
 
     println!("period start,symbol,price,change %,min,max,30d avg");
@@ -32,7 +17,7 @@ fn main() {
     // run fetch_price for all symbols and output to CSV format
     for sym in symbols {
        // fetch prices
-       match fetch_price(sym, &from_date, &to_date, "1d") {
+       match fetch_price(&sym, &from_date, &to_date, "1d") {
         Ok((_, prices)) => {
 
             let last_price = *prices.last().unwrap();
@@ -51,10 +36,18 @@ fn main() {
                 price_thirty_day.last().unwrap_or(&0.0),
             );
         },
-        Err(e) => eprintln!("Error: {}", e),
+        Err(e) => eprintln!("Error on symbol {}: {}", &sym, e),
        }
     }
 
+}
+
+fn cli_args() -> (String, Vec<String>) {
+    let yaml = load_yaml!("app.yml");
+    let matches = App::from_yaml(yaml).get_matches();
+    let symbols = matches.values_of("symbols").unwrap().map(String::from).collect();
+    let from = matches.value_of("from").unwrap().to_owned();
+    (from, symbols)
 }
 
 fn fetch_price(symbol: &str, start: &DateTime<Utc>, end: &DateTime<Utc>, interval: &str) -> Result<(Vec<String>, Vec<f64>), yahoo::YahooError> {
