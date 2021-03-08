@@ -8,5 +8,5 @@ edition = "2018"
 
 [dependencies]
 yahoo_finance_api = {"version" = "1.0", features = ["blocking"]}
-argh = "0.1.4"
+clap = {version = "2.3", features = ["yaml"]}
 chrono = "0.4"

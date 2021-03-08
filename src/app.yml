@@ -1,0 +1,19 @@
+name: pricetracker
+version: "0.1"
+author: Jas B. <jas@bertovic.net>
+about: LiveProject on Manning.com - simple tracker
+args:
+    - from:
+        short: f
+        long: from
+        required: true
+        help: from date specified as yyyy-mm-dd
+        takes_value: true
+    - symbols:
+        short: s
+        long: sym
+        help: symbols to fetch prices data for
+        required: true
+        multiple: true
+        use_delimiter: false
+        takes_value: true

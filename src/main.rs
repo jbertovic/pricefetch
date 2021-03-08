@@ -1,29 +1,36 @@
-use argh::FromArgs;
 use yahoo_finance_api as yahoo;
 use chrono::{NaiveDate, NaiveDateTime, DateTime, Utc, ParseError};
 use std::time::{UNIX_EPOCH, Duration};
 
-/// Struct to contain CLI arguments and configuration 
-#[derive(FromArgs)]
-/// Fetch close history from Yahoo Finance API
-struct PriceFetch {
-    /// from date in format yyyy-mm-dd
-    #[argh(positional)]
-    from: String,
-    /// define symbols to fetch
-    #[argh(positional)]
-    symbols: Vec<String>,
-}
+#[macro_use]
+extern crate clap;
+use clap::App;
+
+// /// Struct to contain CLI arguments and configuration 
+// #[derive(FromArgs)]
+// /// Fetch close history from Yahoo Finance API
+// struct PriceFetch {
+//     /// from date in format yyyy-mm-dd
+//     #[argh(positional)]
+//     from: String,
+//     /// define symbols to fetch
+//     #[argh(positional)]
+//     symbols: Vec<String>,
+// }
 
 fn main() {
-    let sym: PriceFetch = argh::from_env();
-    let from_date: DateTime<Utc> = date_parse(&sym.from).unwrap();
+
+    let yaml = load_yaml!("app.yml");
+    let matches = App::from_yaml(yaml).get_matches();
+
+    let symbols: Vec<&str> = matches.values_of("symbols").unwrap().collect();
+    let from_date: DateTime<Utc> = date_parse(matches.value_of("from").unwrap()).unwrap();
     let to_date: DateTime<Utc> = Utc::now();
 
     println!("period start,symbol,price,change %,min,max,30d avg");
 
     // run fetch_price for all symbols and output to CSV format
-    for sym in &sym.symbols {
+    for sym in symbols {
        // fetch prices
        match fetch_price(sym, &from_date, &to_date, "1d") {
         Ok((_, prices)) => {
