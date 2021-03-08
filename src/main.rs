@@ -1,12 +1,9 @@
-// Need to add currency and percent format
-//
-
 use argh::FromArgs;
 use yahoo_finance_api as yahoo;
 use chrono::{NaiveDate, NaiveDateTime, DateTime, Utc, ParseError};
 use std::time::{UNIX_EPOCH, Duration};
 
-/// Struct to contain CLI arguments and configuration
+/// Struct to contain CLI arguments and configuration 
 #[derive(FromArgs)]
 /// Fetch close history from Yahoo Finance API
 struct PriceFetch {
