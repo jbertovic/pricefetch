@@ -39,7 +39,7 @@ pub fn price_diff(series: &[f64]) -> Option<(f64, f64)> {
     } else {
         let start = *series.first().unwrap();
         let end = *series.last().unwrap();
-        if end == start {
+        if (end - start).abs() < f64::EPSILON {
             Some((0.0, 0.0))
         } else {
             Some(((end - start) / start, end - start))

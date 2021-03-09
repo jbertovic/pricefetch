@@ -66,7 +66,7 @@ async fn fetch_price(
 ) -> Result<(Vec<String>, Vec<f64>), yahoo::YahooError> {
     let provider = yahoo::YahooConnector::new();
     let response = provider
-        .get_quote_history_interval(symbol, start.clone(), end.clone(), interval)
+        .get_quote_history_interval(symbol, *start, *end, interval)
         .await?;
     let quotes = response.quotes()?;
     let mut timestamps = Vec::new();
