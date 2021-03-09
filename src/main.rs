@@ -2,6 +2,9 @@ use yahoo_finance_api as yahoo;
 use chrono::{NaiveDate, NaiveDateTime, DateTime, Utc, ParseError};
 use std::time::{UNIX_EPOCH, Duration};
 
+mod calc;
+use calc::*;
+
 #[macro_use]
 extern crate clap;
 use clap::App;
@@ -73,45 +76,3 @@ fn date_parse(date_str: &str) -> Result<DateTime<Utc>, ParseError>  {
     Ok(DateTime::<Utc>::from_utc(naive_datetime, Utc))
 }
 
-fn min(series: &[f64]) -> Option<f64> {
-    if series.is_empty() {
-        None
-    } else {
-        let mut v = series.to_vec();
-        v.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        Some(v[0])
-    }
-}
-
-fn max(series: &[f64]) -> Option<f64> {
-    if series.is_empty() {
-        None
-    } else {
-        let mut v = series.to_vec();
-        v.sort_by(|a, b| b.partial_cmp(a).unwrap());
-        Some(v[0])
-    }
-}
-
-fn n_window_sma(n: usize, series: &[f64]) -> Option<Vec<f64>> {
-    if series.len() < n { 
-        None 
-    } else {
-        let sma: Vec<f64> = series.windows(n).map(|slice|slice.iter().sum::<f64>()/(30 as f64)).collect();
-        Some(sma)
-    }
-}
-
-fn price_diff(series: &[f64]) -> Option<(f64, f64)> {
-    if series.is_empty() {
-        None
-    } else {
-        let start = *series.first().unwrap();
-        let end = *series.last().unwrap();
-        if end==start {
-            Some((0.0, 0.0))
-        } else {
-            Some(((start-end)/start, start-end))
-        }
-    }
-}
