@@ -61,10 +61,10 @@ async fn run_output(
     match fetch_price(&sym, &from_date, &to_date, "1d").await {
         Ok((_, prices)) => {
             let last_price = *prices.last().unwrap();
-            let change_percent = price_diff(&prices).unwrap().0;
-            let price_min = min(&prices).unwrap();
-            let price_max = max(&prices).unwrap();
-            let price_thirty_day = n_window_sma(30, &prices).unwrap();
+            let change_percent = price_diff(&prices).await.unwrap().0;
+            let price_min = min(&prices).await.unwrap();
+            let price_max = max(&prices).await.unwrap();
+            let price_thirty_day = n_window_sma(30, &prices).await.unwrap();
 
             println!(
                 "{},{},${:.2},{:.2}%,${:.2},${:.2},${:.2}",
