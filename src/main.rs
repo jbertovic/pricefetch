@@ -1,5 +1,5 @@
-use std::time::Instant;
 use async_std::task;
+use std::time::Instant;
 //use async_std::prelude::*;
 use chrono::{DateTime, NaiveDate, NaiveDateTime, ParseError, Utc};
 use std::time::{Duration, UNIX_EPOCH};
@@ -13,7 +13,6 @@ extern crate clap;
 use clap::App;
 
 fn main() {
-
     let start_time = Instant::now();
 
     let (from, symbols) = cli_args();
@@ -32,13 +31,16 @@ fn main() {
     }
 
     // await all tasks to complete
-    task::block_on( async {
+    task::block_on(async {
         for t in tasks {
             t.await;
         }
     });
 
-    println!("Program finished in {} ms", start_time.elapsed().as_millis());
+    println!(
+        "Program finished in {} ms",
+        start_time.elapsed().as_millis()
+    );
 }
 
 fn cli_args() -> (String, Vec<String>) {
@@ -53,11 +55,7 @@ fn cli_args() -> (String, Vec<String>) {
     (from, symbols)
 }
 
-async fn run_output(
-    sym: &str,
-    from_date: &DateTime<Utc>,
-    to_date: &DateTime<Utc>,
-) {
+async fn run_output(sym: &str, from_date: &DateTime<Utc>, to_date: &DateTime<Utc>) {
     match fetch_price(&sym, &from_date, &to_date, "1d").await {
         Ok((_, prices)) => {
             let last_price = *prices.last().unwrap();
@@ -80,7 +78,6 @@ async fn run_output(
         Err(e) => eprintln!("Error on symbol {}: {}", &sym, e),
     }
 }
-
 
 async fn fetch_price(
     symbol: &str,
