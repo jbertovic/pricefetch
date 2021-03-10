@@ -1,4 +1,6 @@
+use std::time::Instant;
 use async_std::task;
+//use async_std::prelude::*;
 use chrono::{DateTime, NaiveDate, NaiveDateTime, ParseError, Utc};
 use std::time::{Duration, UNIX_EPOCH};
 use yahoo_finance_api as yahoo;
@@ -11,39 +13,32 @@ extern crate clap;
 use clap::App;
 
 fn main() {
+
+    let start_time = Instant::now();
+
     let (from, symbols) = cli_args();
     let from_date: DateTime<Utc> = date_parse(&from).unwrap();
     let to_date: DateTime<Utc> = Utc::now();
 
     println!("period start,symbol,price,change %,min,max,30d avg");
 
-    // run fetch_price for all symbols and output to CSV format
-    for sym in symbols {
-        // fetch prices
-        task::block_on(async {
-            match fetch_price(&sym, &from_date, &to_date, "1d").await {
-                Ok((_, prices)) => {
-                    let last_price = *prices.last().unwrap();
-                    let change_percent = price_diff(&prices).unwrap().0;
-                    let price_min = min(&prices).unwrap();
-                    let price_max = max(&prices).unwrap();
-                    let price_thirty_day = n_window_sma(30, &prices).unwrap();
+    let mut tasks = Vec::with_capacity(symbols.len());
 
-                    println!(
-                        "{},{},${:.2},{:.2}%,${:.2},${:.2},${:.2}",
-                        from_date.to_rfc3339(),
-                        sym,
-                        last_price,
-                        change_percent,
-                        price_min,
-                        price_max,
-                        price_thirty_day.last().unwrap_or(&0.0),
-                    );
-                }
-                Err(e) => eprintln!("Error on symbol {}: {}", &sym, e),
-            }
-        })
+    // create task for each symbol to run fetch_price and output to CSV format
+    for sym in symbols {
+        tasks.push(task::spawn(async move {
+            run_output(&sym, &from_date, &to_date).await;
+        }));
     }
+
+    // await all tasks to complete
+    task::block_on( async {
+        for t in tasks {
+            t.await;
+        }
+    });
+
+    println!("Program finished in {} ms", start_time.elapsed().as_millis());
 }
 
 fn cli_args() -> (String, Vec<String>) {
@@ -57,6 +52,35 @@ fn cli_args() -> (String, Vec<String>) {
     let from = matches.value_of("from").unwrap().to_owned();
     (from, symbols)
 }
+
+async fn run_output(
+    sym: &str,
+    from_date: &DateTime<Utc>,
+    to_date: &DateTime<Utc>,
+) {
+    match fetch_price(&sym, &from_date, &to_date, "1d").await {
+        Ok((_, prices)) => {
+            let last_price = *prices.last().unwrap();
+            let change_percent = price_diff(&prices).unwrap().0;
+            let price_min = min(&prices).unwrap();
+            let price_max = max(&prices).unwrap();
+            let price_thirty_day = n_window_sma(30, &prices).unwrap();
+
+            println!(
+                "{},{},${:.2},{:.2}%,${:.2},${:.2},${:.2}",
+                from_date.to_rfc3339(),
+                sym,
+                last_price,
+                change_percent * 100.0,
+                price_min,
+                price_max,
+                price_thirty_day.last().unwrap_or(&0.0),
+            );
+        }
+        Err(e) => eprintln!("Error on symbol {}: {}", &sym, e),
+    }
+}
+
 
 async fn fetch_price(
     symbol: &str,
