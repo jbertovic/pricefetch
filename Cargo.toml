@@ -11,3 +11,5 @@ yahoo_finance_api = {"version" = "1.0"}
 clap = {version = "2.3", features = ["yaml"]}
 chrono = "0.4"
 async-std = {version = "1.9", features = ["attributes"]}
+xactor = {version = "0.7"}
+async-trait = {version = "0.1"}
