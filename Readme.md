@@ -19,6 +19,7 @@ FLAGS:
 OPTIONS:
     -f, --from <from>         from date specified as yyyy-mm-dd
     -s, --sym <symbols>...    symbols to fetch price data
+
 ```
 
 Example run using cargo
