@@ -2,8 +2,10 @@ Following along with a project on LiveProject.manning.com (Building a stock trad
 
 This is my code while participating in the project.
 
+Finished Milestone 2 - Mar 14, 2021 - added intervals and actors to retrieve quotes and procss data.
+
 ```
-pricetracker 0.1
+pricetracker 0.2
 Jas B. <jas@bertovic.net>
 LiveProject on Manning.com - simple tracker
 
@@ -16,7 +18,7 @@ FLAGS:
 
 OPTIONS:
     -f, --from <from>         from date specified as yyyy-mm-dd
-    -s, --sym <symbols>...    symbols to fetch prices data for
+    -s, --sym <symbols>...    symbols to fetch price data
 ```
 
 Example run using cargo
