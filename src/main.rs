@@ -12,7 +12,6 @@ use actors::{QuoteRequest, QuoteRouter, StockDataProcessor};
 extern crate clap;
 use clap::App;
 
-
 #[xactor::main]
 async fn main() -> Result<()> {
     let (from, symbols) = cli_args();
