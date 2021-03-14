@@ -3,6 +3,7 @@ Following along with a project on LiveProject.manning.com (Building a stock trad
 This is my code while participating in the project.
 
 ```
+
 pricetracker 0.1
 Jas B. <jas@bertovic.net>
 LiveProject on Manning.com - simple tracker
@@ -17,12 +18,15 @@ FLAGS:
 OPTIONS:
     -f, --from <from>         from date specified as yyyy-mm-dd
     -s, --sym <symbols>...    symbols to fetch prices data for
+
 ```
 
 Example run using cargo
 
 ```
+
 >cargo run --  -f 2021-01-01 -s AAPL MSFT GOOG INTC SPY       
+
 period start,symbol,price,change %,min,max,30d avg
 2021-01-01T00:00:00+00:00,AAPL,$121.42,0.06%,$120.13,$143.16,$131.73
 2021-01-01T00:00:00+00:00,MSFT,$231.60,-0.06%,$212.25,$244.99,$236.99
