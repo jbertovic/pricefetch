@@ -1,24 +1,24 @@
-use xactor::*;
-use chrono::{DateTime, Utc};
 use async_trait::async_trait;
+use chrono::{DateTime, Utc};
+use xactor::*;
 //use yahoo::YahooError;
-use yahoo_finance_api as yahoo;
 use crate::calc::*;
+use yahoo_finance_api as yahoo;
 
 /// Actor design
-/// 
+///
 /// QuoteRouter
 /// Start - create pool of 5 QuoteDownloader actors and 1 StockDataProcessor
-/// <QuoteRequest> 
+/// <QuoteRequest>
 /// - will use yahoo api to fetch quotes
 /// - Broker to publish <Quotes> message
 ///
 /// QuoteDownloader
 /// Start - subscribe to <QuoteRequest>
-/// <QuoteRequest> 
+/// <QuoteRequest>
 /// - will use yahoo api to fetch quotes
 /// - Broker to publish <Quotes> message
-/// 
+///
 /// StockDataProcessor
 /// Start - subscribed to <Quotes>
 /// <Quotes>
@@ -38,7 +38,7 @@ struct Quotes {
 pub struct QuoteRequest {
     pub symbol: String,
     pub start: DateTime<Utc>,
-    pub end: DateTime<Utc>
+    pub end: DateTime<Utc>,
 }
 pub struct QuoteRouter {
     pub quotedownloader: Vec<Addr<QuoteDownloader>>,
@@ -62,7 +62,8 @@ impl Actor for QuoteRouter {
         // optional: do stuff on handler startup, like downloading at a specific interval, or subscribing to a Broker
         //let qdaddr = QuoteDownloader.start().await.unwrap();
         for _i in 0..self.poolsize {
-            self.quotedownloader.push(QuoteDownloader.start().await.unwrap());
+            self.quotedownloader
+                .push(QuoteDownloader.start().await.unwrap());
         }
         ctx.subscribe::<QuoteRequest>().await?;
         Ok(())
@@ -72,7 +73,7 @@ impl Actor for QuoteRouter {
 #[async_trait]
 impl Handler<QuoteRequest> for QuoteRouter {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: QuoteRequest) {
-        if self.index+1 >= self.quotedownloader.len() { 
+        if self.index + 1 >= self.quotedownloader.len() {
             self.index = 0;
         } else {
             self.index += 1;
@@ -96,7 +97,7 @@ impl Handler<QuoteRequest> for QuoteDownloader {
                     from: msg.start,
                     quotes: resquotes,
                 }
-            },
+            }
             Err(_) => {
                 q = Quotes {
                     symbol: msg.symbol.clone(),
@@ -127,7 +128,7 @@ impl Handler<Quotes> for StockDataProcessor {
         // convert to [f64]
         let prices: Vec<f64>;
         if msg.quotes.is_empty() {
-            prices = vec!(0.0 as f64);
+            prices = vec![0.0 as f64];
         } else {
             prices = msg.quotes.iter().map(|q| q.adjclose).collect();
         }
@@ -149,7 +150,7 @@ async fn output_to_stdout(sym: &str, from: DateTime<Utc>, prices: Vec<f64>) {
     let change_percent = price_diff(&prices).await.unwrap_or((0.0, 0.0));
     let price_min = min(&prices).await.unwrap();
     let price_max = max(&prices).await.unwrap();
-    let price_thirty_day = n_window_sma(30, &prices).await.unwrap_or(vec!(0.0));
+    let price_thirty_day = n_window_sma(30, &prices).await.unwrap_or(vec![0.0]);
 
     println!(
         "{},{},${:.2},{:.2}%,${:.2},${:.2},${:.2}",

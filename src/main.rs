@@ -1,12 +1,10 @@
 use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
 use std::time::Duration;
-//use yahoo_finance_api as yahoo;
-use xactor::*;
-use async_std::stream;
 use async_std::prelude::*;
-mod calc;
-//use calc::*;
+use async_std::stream;
+use xactor::*;
 
+mod calc;
 mod actors;
 use actors::{QuoteRequest, QuoteRouter, StockDataProcessor};
 
@@ -16,15 +14,13 @@ use clap::App;
 
 #[xactor::main]
 async fn main() -> Result<()> {
-
     let (from, symbols) = cli_args();
     let from_date: DateTime<Utc> = date_parse(&from).unwrap();
 
     println!("period start,symbol,price,change %,min,max,30d avg");
 
-    let _router = Supervisor::start(||QuoteRouter::new(5)).await?;
+    let _router = Supervisor::start(|| QuoteRouter::new(5)).await?;
     let _processor = StockDataProcessor.start().await.unwrap();
-
 
     let mut symbroker: Addr<Broker<QuoteRequest>> = Broker::from_registry().await?;
 
@@ -37,7 +33,7 @@ async fn main() -> Result<()> {
                 symbol: sym.clone(),
                 start: from_date,
                 end: to_date,
-                };
+            };
             symbroker.publish(msg)?;
         }
     }
@@ -55,7 +51,6 @@ fn cli_args() -> (String, Vec<String>) {
     let from = matches.value_of("from").unwrap().to_owned();
     (from, symbols)
 }
-
 
 fn date_parse(date_str: &str) -> Result<DateTime<Utc>> {
     // From string to a NaiveDate
