@@ -1,7 +1,7 @@
 name: pricetracker
 version: "0.1"
 author: Jas B. <jas@bertovic.net>
-about: LiveProject on Manning.com - simple tracker
+about: LiveProject on Manning.com - simple tracker - Milestone 2.0
 args:
     - from:
         short: f
@@ -12,8 +12,8 @@ args:
     - symbols:
         short: s
         long: sym
-        help: symbols to fetch prices data for
+        help: symbols to fetch price data 
         required: true
         multiple: true
-        use_delimiter: false
+        use_delimiter: true
         takes_value: true

@@ -12,16 +12,12 @@ use crate::calc::*;
 /// <QuoteRequest> 
 /// - will use yahoo api to fetch quotes
 /// - Broker to publish <Quotes> message
-/// <Halt>
-/// - stop <QuoteRequest>
 /// 
 /// StockDataProcessor
 /// Start - subscribed to <Quotes>
 /// <Quotes>
 /// - calculate stats
 /// - output stats
-/// <Halt>
-/// - stop <StockDataProcessor>
 
 #[message]
 #[derive(Debug, Clone)]
@@ -40,6 +36,12 @@ pub struct QuoteRequest {
 }
 
 #[derive(Default)]
+pub struct QuoteRouter;
+
+
+
+
+#[derive(Default)]
 pub struct QuoteDownloader;
 
 #[async_trait]
@@ -50,14 +52,14 @@ impl Handler<QuoteRequest> for QuoteDownloader {
         match fetch_price(&msg.symbol, msg.start, msg.end, "1d").await {
             Ok(resquotes) => {
                 q = Quotes {
-                    symbol: msg.symbol,
+                    symbol: msg.symbol.clone(),
                     from: msg.start,
                     quotes: resquotes,
                 }
             },
             Err(_) => {
                 q = Quotes {
-                    symbol: msg.symbol,
+                    symbol: msg.symbol.clone(),
                     from: msg.start,
                     quotes: vec![],
                 }
