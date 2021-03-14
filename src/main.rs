@@ -8,7 +8,7 @@ mod calc;
 //use calc::*;
 
 mod actors;
-use actors::{QuoteDownloader, StockDataProcessor, QuoteRequest};
+use actors::{QuoteRequest, QuoteRouter, StockDataProcessor};
 
 #[macro_use]
 extern crate clap;
@@ -22,8 +22,9 @@ async fn main() -> Result<()> {
 
     println!("period start,symbol,price,change %,min,max,30d avg");
 
-    let _downloader = Supervisor::start(||QuoteDownloader).await?;
-    let _processor = Supervisor::start(||StockDataProcessor).await?;
+    let _router = Supervisor::start(||QuoteRouter::new(5)).await?;
+    let _processor = StockDataProcessor.start().await.unwrap();
+
 
     let mut symbroker: Addr<Broker<QuoteRequest>> = Broker::from_registry().await?;
 

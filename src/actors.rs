@@ -7,6 +7,12 @@ use crate::calc::*;
 
 /// Actor design
 /// 
+/// QuoteRouter
+/// Start - create pool of 5 QuoteDownloader actors and 1 StockDataProcessor
+/// <QuoteRequest> 
+/// - will use yahoo api to fetch quotes
+/// - Broker to publish <Quotes> message
+///
 /// QuoteDownloader
 /// Start - subscribe to <QuoteRequest>
 /// <QuoteRequest> 
@@ -34,12 +40,46 @@ pub struct QuoteRequest {
     pub start: DateTime<Utc>,
     pub end: DateTime<Utc>
 }
+pub struct QuoteRouter {
+    pub quotedownloader: Vec<Addr<QuoteDownloader>>,
+    pub poolsize: usize,
+    index: usize,
+}
 
-#[derive(Default)]
-pub struct QuoteRouter;
+impl QuoteRouter {
+    pub fn new(poolsize: usize) -> QuoteRouter {
+        QuoteRouter {
+            quotedownloader: Vec::new(),
+            poolsize,
+            index: 0,
+        }
+    }
+}
 
+#[async_trait]
+impl Actor for QuoteRouter {
+    async fn started(&mut self, ctx: &mut Context<Self>) -> Result<()> {
+        // optional: do stuff on handler startup, like downloading at a specific interval, or subscribing to a Broker
+        //let qdaddr = QuoteDownloader.start().await.unwrap();
+        for _i in 0..self.poolsize {
+            self.quotedownloader.push(QuoteDownloader.start().await.unwrap());
+        }
+        ctx.subscribe::<QuoteRequest>().await?;
+        Ok(())
+    }
+}
 
-
+#[async_trait]
+impl Handler<QuoteRequest> for QuoteRouter {
+    async fn handle(&mut self, _ctx: &mut Context<Self>, msg: QuoteRequest) {
+        if self.index+1 >= self.quotedownloader.len() { 
+            self.index = 0;
+        } else {
+            self.index += 1;
+        }
+        self.quotedownloader[self.index].send(msg).unwrap();
+    }
+}
 
 #[derive(Default)]
 pub struct QuoteDownloader;
@@ -71,9 +111,8 @@ impl Handler<QuoteRequest> for QuoteDownloader {
 
 #[async_trait]
 impl Actor for QuoteDownloader {
-    async fn started(&mut self, ctx: &mut Context<Self>) -> Result<()> {
+    async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
         // optional: do stuff on handler startup, like downloading at a specific interval, or subscribing to a Broker
-        ctx.subscribe::<QuoteRequest>().await?;
         Ok(())
     }
 }
