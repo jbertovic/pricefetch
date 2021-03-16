@@ -988,13 +988,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ac74c624d6b2d21f425f752262f42188365d7b8ff1aff74c82e45136510a4857"
 
 [[package]]
-name = "pricefetch"
+name = "pricefetchcli"
+version = "0.2.0"
+dependencies = [
+ "clap",
+ "pricefetchlib",
+]
+
+[[package]]
+name = "pricefetchlib"
 version = "0.2.0"
 dependencies = [
  "async-std",
  "async-trait",
  "chrono",
- "clap",
  "xactor",
  "yahoo_finance_api",
 ]
