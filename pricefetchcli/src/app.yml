@@ -1,7 +1,7 @@
 name: pricetracker
-version: "0.2"
+version: "0.3"
 author: Jas B. <jas@bertovic.net>
-about: LiveProject on Manning.com - simple tracker - Milestone 2.0
+about: LiveProject on Manning.com - simple tracker - Milestone 3.0
 args:
     - from:
         short: f
