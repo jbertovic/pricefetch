@@ -4,6 +4,8 @@ version = "0.2.0"
 authors = ["Jas Bertovic <jas@bertovic.net>"]
 edition = "2018"
 
+[lib]
+crate-type = ["staticlib", "rlib"]
 
 [dependencies]
 yahoo_finance_api = {"version" = "1.0"}
