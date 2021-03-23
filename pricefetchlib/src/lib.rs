@@ -9,19 +9,11 @@ use async_std::stream;
 use xactor::*;
 use actors::{DataWriterCsv, DataWriterStdout, QuoteRequest, QuoteRouter, StockDataProcessor};
 
-
 pub fn run_program(symbols: Vec<String>, from: String, pool_num: String, file_name: Option<String>) -> Result<()> {
 
     // setup parameters for actors
     let from_date: DateTime<Utc> = utility::date_parse(&from).unwrap();
     let pool_size:usize = pool_num.parse::<usize>().unwrap_or(5);
-
-    // see if csv file option is selected and get filename
-    // create File, Writer and Buffer to handle output to csv
-    // quite if there are any errors
-
-
-    // pass csv option along to setup to actor system somehow?
 
     task::block_on(
         async {
