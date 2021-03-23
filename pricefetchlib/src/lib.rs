@@ -4,14 +4,15 @@ pub mod utility;
 
 use chrono::{DateTime, Utc};
 use std::time::Duration;
-use async_std::{prelude::*, task};
+use async_std::{fs::File, io::BufWriter, prelude::*, task};
 use async_std::stream;
 use xactor::*;
-use actors::{QuoteRequest, QuoteRouter, StockDataProcessor, DataWriterStdout};
+use actors::{DataWriterCsv, DataWriterStdout, QuoteRequest, QuoteRouter, StockDataProcessor};
 
 
-pub fn run_program(symbols: Vec<String>, from: String, pool_num: String) -> Result<()> {
+pub fn run_program(symbols: Vec<String>, from: String, pool_num: String, file_name: Option<String>) -> Result<()> {
 
+    // setup parameters for actors
     let from_date: DateTime<Utc> = utility::date_parse(&from).unwrap();
     let pool_size:usize = pool_num.parse::<usize>().unwrap_or(5);
 
@@ -26,7 +27,17 @@ pub fn run_program(symbols: Vec<String>, from: String, pool_num: String) -> Resu
         async {
             let _router = Supervisor::start(move || QuoteRouter::new(pool_size)).await.unwrap();
             let _processor = StockDataProcessor.start().await.unwrap();
-            let _data_writer = DataWriterStdout.start().await.unwrap();
+            let _screen_writer = DataWriterStdout.start().await.unwrap();
+
+            let _file_writer = 
+                match file_name {
+                    Some(name) => {
+                        let file = File::create(name).await.unwrap();
+                        let writer = BufWriter::new(file);
+                        Some(DataWriterCsv{writer}.start().await.unwrap())
+                    },
+                    None => None,
+                };
         
             let mut symbroker: Addr<Broker<QuoteRequest>> = Broker::from_registry().await.unwrap();
         

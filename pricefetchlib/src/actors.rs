@@ -187,9 +187,7 @@ impl Handler<Output> for DataWriterStdout {
 
 //#[derive(Default)]
 pub struct DataWriterCsv{
-    writer: BufWriter<File>,
-    // Write Buffer
-    // Write File
+    pub writer: BufWriter<File>,
 }
 
 impl DataWriterCsv {
@@ -207,7 +205,7 @@ impl Actor for DataWriterCsv {
     async fn started(&mut self, ctx: &mut Context<Self>) -> Result<()> {
         // optional: do stuff on handler startup, like subscribing to a Broker
         ctx.subscribe::<Output>().await?;
-        self.writer.write(b"period start,symbol,price,change %,min,max,30d avg");
+        self.writer.write(b"period start,symbol,price,change %,min,max,30d avg\n").await?;
         Ok(())
     }
 }
@@ -215,7 +213,8 @@ impl Actor for DataWriterCsv {
 #[async_trait]
 impl Handler<Output> for DataWriterCsv {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: Output) {
-        println!("{}", msg.0);
+        self.writer.write(format!("{}\n", msg.0).as_bytes()).await.unwrap();
+        self.writer.flush().await.unwrap();
     }
 }
 

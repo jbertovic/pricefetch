@@ -3,13 +3,13 @@ extern crate clap;
 use clap::App;
 
 fn main() {
-    let (from, symbols, pool_num) = cli_args();
+    let (from, symbols, pool_num, file_name) = cli_args();
     
-    pricefetchlib::run_program(symbols, from, pool_num).unwrap();
+    pricefetchlib::run_program(symbols, from, pool_num, file_name).unwrap();
 
 }
 
-fn cli_args() -> (String, Vec<String>, String) {
+fn cli_args() -> (String, Vec<String>, String, Option<String>) {
     let yaml = load_yaml!("app.yml");
     let matches = App::from_yaml(yaml).get_matches();
     let symbols = matches
@@ -19,7 +19,12 @@ fn cli_args() -> (String, Vec<String>, String) {
         .collect();
     let from = matches.value_of("from").unwrap().to_owned();
     let pool_num = matches.value_of("pool").unwrap().to_owned();
-    (from, symbols, pool_num)
+    let file_name = 
+        match matches.value_of("csv") {
+            Some(name) => Some(name.to_owned()),
+            None => None,
+        };
+    (from, symbols, pool_num, file_name)
 }
 
 
