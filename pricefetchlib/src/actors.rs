@@ -8,13 +8,13 @@ use yahoo_finance_api as yahoo;
 /// Actor design
 ///
 /// QuoteRouter
-/// Start - create pool of 5 QuoteDownloader actors and 1 StockDataProcessor
+/// Start 
+/// - create pool of 5 QuoteDownloader actors and 1 StockDataProcessor
+/// - subscribe to <QuoteRequest>
 /// <QuoteRequest>
-/// - will use yahoo api to fetch quotes
-/// - Broker to publish <Quotes> message
+/// - Use one of the pooled QuoteDownloader actors
 ///
 /// QuoteDownloader
-/// Start - subscribe to <QuoteRequest>
 /// <QuoteRequest>
 /// - will use yahoo api to fetch quotes
 /// - Broker to publish <Quotes> message
