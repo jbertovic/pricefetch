@@ -23,3 +23,10 @@ args:
         help: name of file to output csv format
         required: false
         takes_value: true
+    - pool:
+        short: p
+        long: pool
+        help: number of downloader actors
+        takes_value: true
+        default_value: "5"
+

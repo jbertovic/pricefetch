@@ -7,19 +7,26 @@ use std::time::Duration;
 use async_std::{prelude::*, task};
 use async_std::stream;
 use xactor::*;
-use actors::{QuoteRequest, QuoteRouter, StockDataProcessor};
+use actors::{QuoteRequest, QuoteRouter, StockDataProcessor, DataWriterStdout};
 
 
-pub fn run_program(symbols: Vec<String>, from: String) -> Result<()> {
+pub fn run_program(symbols: Vec<String>, from: String, pool_num: String) -> Result<()> {
 
     let from_date: DateTime<Utc> = utility::date_parse(&from).unwrap();
+    let pool_size:usize = pool_num.parse::<usize>().unwrap_or(5);
 
-    println!("period start,symbol,price,change %,min,max,30d avg");
+    // see if csv file option is selected and get filename
+    // create File, Writer and Buffer to handle output to csv
+    // quite if there are any errors
+
+
+    // pass csv option along to setup to actor system somehow?
 
     task::block_on(
         async {
-            let _router = Supervisor::start(|| QuoteRouter::new(5)).await.unwrap();
+            let _router = Supervisor::start(move || QuoteRouter::new(pool_size)).await.unwrap();
             let _processor = StockDataProcessor.start().await.unwrap();
+            let _data_writer = DataWriterStdout.start().await.unwrap();
         
             let mut symbroker: Addr<Broker<QuoteRequest>> = Broker::from_registry().await.unwrap();
         

@@ -1,3 +1,4 @@
+use async_std::{fs::File, io::{BufWriter, prelude::WriteExt}};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use xactor::*;
@@ -23,7 +24,19 @@ use yahoo_finance_api as yahoo;
 /// Start - subscribed to <Quotes>
 /// <Quotes>
 /// - calculate stats
-/// - output stats
+/// - publish<Output>
+/// 
+/// DataWriterStdout
+/// Start - subscribed to <Output>
+/// <Output>
+/// - write to stdout
+/// 
+/// DataWriterCSV
+/// Start - subscribed to <Output>
+/// <Output>
+/// - write to csv file
+/// 
+
 
 #[message]
 #[derive(Debug, Clone)]
@@ -40,6 +53,11 @@ pub struct QuoteRequest {
     pub start: DateTime<Utc>,
     pub end: DateTime<Utc>,
 }
+
+#[message]
+#[derive(Debug, Clone)]
+pub struct Output(String);
+
 pub struct QuoteRouter {
     pub quotedownloader: Vec<Addr<QuoteDownloader>>,
     pub poolsize: usize,
@@ -82,7 +100,7 @@ impl Handler<QuoteRequest> for QuoteRouter {
     }
 }
 
-#[derive(Default)]
+//#[derive(Default)]
 pub struct QuoteDownloader;
 
 #[async_trait]
@@ -118,7 +136,7 @@ impl Actor for QuoteDownloader {
     }
 }
 
-#[derive(Default)]
+//#[derive(Default)]
 pub struct StockDataProcessor;
 
 #[async_trait]
@@ -130,9 +148,10 @@ impl Handler<Quotes> for StockDataProcessor {
         if msg.quotes.is_empty() {
             prices = vec![0.0 as f64];
         } else {
-            prices = msg.quotes.iter().map(|q| q.adjclose).collect();
+            prices = msg.quotes.iter().map(|q| q.close).collect();
         }
-        output_to_stdout(&msg.symbol, msg.from, prices).await;
+        let outputmsg = Output(output_to_stdout(&msg.symbol, msg.from, prices).await);
+        Broker::from_registry().await.unwrap().publish(outputmsg).unwrap();
     }
 }
 
@@ -145,14 +164,71 @@ impl Actor for StockDataProcessor {
     }
 }
 
-async fn output_to_stdout(sym: &str, from: DateTime<Utc>, prices: Vec<f64>) {
+//#[derive(Default)]
+pub struct DataWriterStdout;
+
+#[async_trait]
+impl Actor for DataWriterStdout {
+    async fn started(&mut self, ctx: &mut Context<Self>) -> Result<()> {
+        // optional: do stuff on handler startup, like subscribing to a Broker
+        ctx.subscribe::<Output>().await?;
+        println!("period start,symbol,price,change %,min,max,30d avg");
+        Ok(())
+    }
+}
+
+#[async_trait]
+impl Handler<Output> for DataWriterStdout {
+    async fn handle(&mut self, _ctx: &mut Context<Self>, msg: Output) {
+        println!("{}", msg.0);
+    }
+}
+
+
+//#[derive(Default)]
+pub struct DataWriterCsv{
+    writer: BufWriter<File>,
+    // Write Buffer
+    // Write File
+}
+
+impl DataWriterCsv {
+    pub fn new(writer: BufWriter<File>) -> DataWriterCsv {
+        DataWriterCsv {
+            writer
+        }
+    }
+}
+
+
+
+#[async_trait]
+impl Actor for DataWriterCsv {
+    async fn started(&mut self, ctx: &mut Context<Self>) -> Result<()> {
+        // optional: do stuff on handler startup, like subscribing to a Broker
+        ctx.subscribe::<Output>().await?;
+        self.writer.write(b"period start,symbol,price,change %,min,max,30d avg");
+        Ok(())
+    }
+}
+
+#[async_trait]
+impl Handler<Output> for DataWriterCsv {
+    async fn handle(&mut self, _ctx: &mut Context<Self>, msg: Output) {
+        println!("{}", msg.0);
+    }
+}
+
+
+
+async fn output_to_stdout(sym: &str, from: DateTime<Utc>, prices: Vec<f64>) -> String {
     let last_price = *prices.last().unwrap();
     let change_percent = price_diff(&prices).await.unwrap_or((0.0, 0.0));
     let price_min = min(&prices).await.unwrap();
     let price_max = max(&prices).await.unwrap();
     let price_thirty_day = n_window_sma(30, &prices).await.unwrap_or(vec![0.0]);
 
-    println!(
+    format!(
         "{},{},${:.2},{:.2}%,${:.2},${:.2},${:.2}",
         from.to_rfc3339(),
         sym,
@@ -161,7 +237,7 @@ async fn output_to_stdout(sym: &str, from: DateTime<Utc>, prices: Vec<f64>) {
         price_min,
         price_max,
         price_thirty_day.last().unwrap_or(&0.0),
-    );
+    )
 }
 
 async fn fetch_price(
