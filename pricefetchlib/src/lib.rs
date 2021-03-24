@@ -7,7 +7,7 @@ use std::time::Duration;
 use async_std::{fs::File, io::BufWriter, prelude::*, task};
 use async_std::stream;
 use xactor::*;
-use actors::{DataWriterCsv, DataWriterStdout, QuoteRequest, QuoteRouter, StockDataProcessor, DataStore, GetSymbol};
+use actors::{DataWriterCsv, DataWriterStdout, QuoteRequest, QuoteRouter, StockDataProcessor, DataStore};
 
 pub fn run_program(symbols: Vec<String>, from: String, pool_num: String, file_name: Option<String>) -> Result<()> {
 
@@ -20,8 +20,12 @@ pub fn run_program(symbols: Vec<String>, from: String, pool_num: String, file_na
             let _router = Supervisor::start(move || QuoteRouter::new(pool_size)).await.unwrap();
             let _processor = StockDataProcessor.start().await.unwrap();
             let _screen_writer = DataWriterStdout.start().await.unwrap();
-            let data_store = DataStore::new().start().await.unwrap();
-//            let ds = data_store.clone();
+
+            // add arguments to understand to start server 
+            // Option to start both datastore and server
+            // create new server.rs and import tide (could use as optional?)
+        
+            let _data_store = DataStore::new().start().await.unwrap();
 
             let _file_writer = 
                 match file_name {
