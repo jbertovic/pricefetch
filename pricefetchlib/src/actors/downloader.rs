@@ -59,7 +59,6 @@ impl Handler<QuoteRequest> for QuoteRouter {
     }
 }
 
-//#[derive(Default)]
 pub struct QuoteDownloader;
 
 #[async_trait]

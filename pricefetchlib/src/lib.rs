@@ -7,7 +7,7 @@ use std::time::Duration;
 use async_std::{fs::File, io::BufWriter, prelude::*, task};
 use async_std::stream;
 use xactor::*;
-use actors::{DataWriterCsv, DataWriterStdout, QuoteRequest, QuoteRouter, StockDataProcessor};
+use actors::{DataWriterCsv, DataWriterStdout, QuoteRequest, QuoteRouter, StockDataProcessor, DataStore, GetSymbol};
 
 pub fn run_program(symbols: Vec<String>, from: String, pool_num: String, file_name: Option<String>) -> Result<()> {
 
@@ -20,6 +20,8 @@ pub fn run_program(symbols: Vec<String>, from: String, pool_num: String, file_na
             let _router = Supervisor::start(move || QuoteRouter::new(pool_size)).await.unwrap();
             let _processor = StockDataProcessor.start().await.unwrap();
             let _screen_writer = DataWriterStdout.start().await.unwrap();
+            let data_store = DataStore::new().start().await.unwrap();
+//            let ds = data_store.clone();
 
             let _file_writer = 
                 match file_name {
@@ -45,6 +47,8 @@ pub fn run_program(symbols: Vec<String>, from: String, pool_num: String, file_na
                     };
                     symbroker.publish(msg).unwrap();
                 }
+                // let response = ds.call(GetSymbol("QQQ".to_string())).await.unwrap();
+                // println!("GET QQQ:  {:?}", response);
             };
         }
     );

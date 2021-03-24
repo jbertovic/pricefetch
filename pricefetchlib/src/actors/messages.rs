@@ -21,3 +21,7 @@ pub struct QuoteRequest {
 #[message]
 #[derive(Debug, Clone)]
 pub struct Output(pub String);
+
+#[message(result = "String")]
+#[derive(Debug, Clone)]
+pub struct GetSymbol(pub String);

@@ -33,8 +33,6 @@ impl Handler<Output> for DataWriterStdout {
     }
 }
 
-
-//#[derive(Default)]
 pub struct DataWriterCsv{
     pub writer: BufWriter<File>,
 }
@@ -46,8 +44,6 @@ impl DataWriterCsv {
         }
     }
 }
-
-
 
 #[async_trait]
 impl Actor for DataWriterCsv {
