@@ -1,15 +1,18 @@
 #[macro_use]
 extern crate clap;
 use clap::App;
+use anyhow::Result;
 
-fn main() {
-    let (from, symbols, pool_num, file_name) = cli_args();
+fn main() -> Result<()> {
+    let (from, symbols, pool_num, file_name, server) = cli_args();
     
-    pricefetchlib::run_program(symbols, from, pool_num, file_name).unwrap();
+    pricefetchlib::run_program(symbols, from, pool_num, file_name, server)?;
+
+    Ok(())
 
 }
 
-fn cli_args() -> (String, Vec<String>, String, Option<String>) {
+fn cli_args() -> (String, Vec<String>, String, Option<String>, bool) {
     let yaml = load_yaml!("app.yml");
     let matches = App::from_yaml(yaml).get_matches();
     let symbols = matches
@@ -24,7 +27,8 @@ fn cli_args() -> (String, Vec<String>, String, Option<String>) {
             Some(name) => Some(name.to_owned()),
             None => None,
         };
-    (from, symbols, pool_num, file_name)
+    let server = matches.is_present("server");
+    (from, symbols, pool_num, file_name, server)
 }
 
 

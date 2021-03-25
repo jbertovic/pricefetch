@@ -1636,6 +1636,7 @@ checksum = "ac74c624d6b2d21f425f752262f42188365d7b8ff1aff74c82e45136510a4857"
 name = "pricefetchcli"
 version = "0.4.0"
 dependencies = [
+ "anyhow",
  "clap",
  "pricefetchlib",
 ]
