@@ -8,6 +8,7 @@ pub use messages::QuoteRequest as QuoteRequest;
 pub use messages::Quotes as Quotes;
 pub use messages::Output as Output;
 pub use messages::Getn as Getn;
+pub use messages::Getn as Gets;
 
 pub use downloader::QuoteRouter as QuoteRouter;
 pub use processor::StockDataProcessor as StockDataProcessor;

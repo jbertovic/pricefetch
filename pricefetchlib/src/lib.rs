@@ -1,6 +1,7 @@
 pub mod calc;
 pub mod actors;
 pub mod utility;
+pub mod server;
 
 use chrono::{DateTime, Utc};
 use std::time::Duration;
@@ -8,8 +9,12 @@ use async_std::{fs::File, io::BufWriter, prelude::*, task};
 use async_std::stream;
 use xactor::*;
 use actors::{DataWriterCsv, DataWriterStdout, QuoteRequest, QuoteRouter, StockDataProcessor, DataStoreBuffer};
+use server::run_server;
 
-pub fn run_program(symbols: Vec<String>, from: String, pool_num: String, file_name: Option<String>) -> Result<()> {
+const BUFFER_SIZE: usize = 5_000;
+
+
+pub fn run_program(symbols: Vec<String>, from: String, pool_num: String, file_name: Option<String>, server: bool) -> Result<()> {
 
     // setup parameters for actors
     let from_date: DateTime<Utc> = utility::date_parse(&from).unwrap();
@@ -21,11 +26,16 @@ pub fn run_program(symbols: Vec<String>, from: String, pool_num: String, file_na
             let _processor = StockDataProcessor.start().await.unwrap();
             let _screen_writer = DataWriterStdout.start().await.unwrap();
 
-            // add arguments to understand to start server 
-            // Option to start both datastore and server
-            // create new server.rs and import tide (could use as optional?)
-        
-            let _data_store = DataStoreBuffer::new(10).start().await.unwrap();
+            let (_data_store, _server) =
+                match server {
+                    true => {
+                        let dsb = DataStoreBuffer::new(BUFFER_SIZE).start().await.unwrap();
+                        let dsbs = dsb.clone();
+                        let s = task::spawn( run_server(dsbs) );
+                        (Some(dsb), Some(s))
+                    },
+                    false => (None, None)
+                };
 
             let _file_writer = 
                 match file_name {
@@ -51,8 +61,6 @@ pub fn run_program(symbols: Vec<String>, from: String, pool_num: String, file_na
                     };
                     symbroker.publish(msg).unwrap();
                 }
-                // let response = ds.call(GetSymbol("QQQ".to_string())).await.unwrap();
-                // println!("GET QQQ:  {:?}", response);
             };
         }
     );

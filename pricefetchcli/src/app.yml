@@ -24,7 +24,7 @@ args:
         required: false
         takes_value: true
     - server:
-        short: s
+        short: x
         long: server
         help: starts server on localhost port 8080
         required: false
