@@ -1,10 +1,8 @@
-
-use chrono::Utc;
-use chrono::DateTime;
-use std::fmt;
-use serde::{Serialize, Serializer};
 use crate::calc::*;
-
+use chrono::DateTime;
+use chrono::Utc;
+use serde::{Serialize, Serializer};
+use std::fmt;
 
 pub const DATA_HEADER: &str = "period start,symbol,price,change %,min,max,30d avg";
 
@@ -46,27 +44,24 @@ impl DataStamp {
 
 impl fmt::Display for DataStamp {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{},{},${:.2},{:.2}%,${:.2},${:.2},${:.2}",
-            self.from,
-            self.symbol,
-            self.last,
-            self.change,
-            self.min,
-            self.max,
-            self.sma_30)
+        write!(
+            f,
+            "{},{},${:.2},{:.2}%,${:.2},${:.2},${:.2}",
+            self.from, self.symbol, self.last, self.change, self.min, self.max, self.sma_30
+        )
     }
 }
 
-async fn sma_last(ts: &Vec<f64>) -> f64 {
+async fn sma_last(ts: &[f64]) -> f64 {
     match n_window_sma(30, ts).await {
         Some(list) => *list.last().unwrap(),
         None => 0.0,
     }
 }
 
-async fn change(ts: &Vec<f64>) -> f64 {
+async fn change(ts: &[f64]) -> f64 {
     match price_diff(ts).await {
-        Some((percent, _)) => percent*100.0,
+        Some((percent, _)) => percent * 100.0,
         None => 0.0,
     }
 }

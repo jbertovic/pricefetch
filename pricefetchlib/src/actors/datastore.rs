@@ -1,8 +1,8 @@
-use std::collections::VecDeque;
-use async_trait::async_trait;
-use xactor::*;
+use super::{Getn, TimeStamp};
 use crate::DataStamp;
-use super::{TimeStamp, Getn};
+use async_trait::async_trait;
+use std::collections::VecDeque;
+use xactor::*;
 
 /// DataStore
 /// Start - subscribed to <Output>
@@ -11,10 +11,10 @@ use super::{TimeStamp, Getn};
 /// - store record by symbol
 /// <Getn>
 /// - return last n records
-/// 
+///
 
 #[derive(Default)]
-pub struct DataStoreBuffer{
+pub struct DataStoreBuffer {
     store: VecDeque<DataStamp>,
 }
 
@@ -41,7 +41,11 @@ impl Handler<TimeStamp> for DataStoreBuffer {
 #[async_trait]
 impl Handler<Getn> for DataStoreBuffer {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: Getn) -> Vec<DataStamp> {
-        self.store.iter().take(msg.0).map(|o| o.to_owned()).collect()
+        self.store
+            .iter()
+            .take(msg.0)
+            .map(|o| o.to_owned())
+            .collect()
     }
 }
 
@@ -52,4 +56,3 @@ impl Actor for DataStoreBuffer {
         Ok(())
     }
 }
-

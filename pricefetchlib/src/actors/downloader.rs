@@ -1,11 +1,11 @@
-use async_trait::async_trait;
-use xactor::*;
 use super::messages::{QuoteRequest, Quotes};
-use yahoo_finance_api as yahoo;
+use async_trait::async_trait;
 use chrono::{DateTime, Utc};
+use xactor::*;
+use yahoo_finance_api as yahoo;
 
 /// QuoteRouter
-/// Start 
+/// Start
 /// - create pool of 5 QuoteDownloader actors and 1 StockDataProcessor
 /// - subscribe to <QuoteRequest>
 /// <QuoteRequest>

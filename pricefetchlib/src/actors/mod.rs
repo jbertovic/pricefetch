@@ -1,16 +1,16 @@
-mod messages;
-mod downloader;
-mod processor;
-mod outputwriter;
 mod datastore;
+mod downloader;
+mod messages;
+mod outputwriter;
+mod processor;
 
-pub use messages::QuoteRequest as QuoteRequest;
-pub use messages::Quotes as Quotes;
-pub use messages::TimeStamp as TimeStamp;
-pub use messages::Getn as Getn;
+pub use messages::Getn;
+pub use messages::QuoteRequest;
+pub use messages::Quotes;
+pub use messages::TimeStamp;
 
-pub use downloader::QuoteRouter as QuoteRouter;
-pub use processor::StockDataProcessor as StockDataProcessor;
-pub use outputwriter::DataWriterCsv as DataWriterCsv;
-pub use outputwriter::DataWriterStdout as DataWriterStdout;
-pub use datastore::DataStoreBuffer as DataStoreBuffer;
+pub use datastore::DataStoreBuffer;
+pub use downloader::QuoteRouter;
+pub use outputwriter::DataWriterCsv;
+pub use outputwriter::DataWriterStdout;
+pub use processor::StockDataProcessor;

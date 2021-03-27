@@ -1,7 +1,7 @@
-use async_trait::async_trait;
-use xactor::*;
 use super::{Quotes, TimeStamp};
 use crate::DataStamp;
+use async_trait::async_trait;
+use xactor::*;
 
 /// StockDataProcessor
 /// Start - subscribed to <Quotes>
@@ -18,7 +18,7 @@ impl Handler<Quotes> for StockDataProcessor {
         // convert to [f64]
         let prices: Vec<f64>;
         if msg.quotes.is_empty() {
-            prices = vec![0.0 as f64];
+            prices = vec![0.0_f64];
         } else {
             prices = msg.quotes.iter().map(|q| q.close).collect();
         }

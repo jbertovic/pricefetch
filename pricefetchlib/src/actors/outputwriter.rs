@@ -1,19 +1,22 @@
-use async_std::{fs::File, io::{BufWriter, prelude::WriteExt}};
+use super::TimeStamp;
+use crate::DATA_HEADER;
+use async_std::{
+    fs::File,
+    io::{prelude::WriteExt, BufWriter},
+};
 use async_trait::async_trait;
 use xactor::*;
-use crate::DATA_HEADER;
-use super::TimeStamp;
 
 /// DataWriterStdout
 /// Start - subscribed to <Output>
 /// <TimeStamp>
 /// - write to stdout
-/// 
+///
 /// DataWriterCSV
 /// Start - subscribed to <Output>
 /// <TimeStamp>
 /// - write to csv file
-/// 
+///
 
 pub struct DataWriterStdout;
 
@@ -33,15 +36,13 @@ impl Handler<TimeStamp> for DataWriterStdout {
     }
 }
 
-pub struct DataWriterCsv{
+pub struct DataWriterCsv {
     pub writer: BufWriter<File>,
 }
 
 impl DataWriterCsv {
     pub fn new(writer: BufWriter<File>) -> DataWriterCsv {
-        DataWriterCsv {
-            writer
-        }
+        DataWriterCsv { writer }
     }
 }
 
@@ -49,7 +50,9 @@ impl DataWriterCsv {
 impl Actor for DataWriterCsv {
     async fn started(&mut self, ctx: &mut Context<Self>) -> Result<()> {
         ctx.subscribe::<TimeStamp>().await?;
-        self.writer.write(format!("{}\n", DATA_HEADER).as_bytes()).await?;
+        self.writer
+            .write(format!("{}\n", DATA_HEADER).as_bytes())
+            .await?;
         Ok(())
     }
 }
@@ -57,7 +60,10 @@ impl Actor for DataWriterCsv {
 #[async_trait]
 impl Handler<TimeStamp> for DataWriterCsv {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: TimeStamp) {
-        self.writer.write(format!("{}\n", msg.0).as_bytes()).await.unwrap();
+        self.writer
+            .write(format!("{}\n", msg.0).as_bytes())
+            .await
+            .unwrap();
         self.writer.flush().await.unwrap();
     }
 }
