@@ -2,17 +2,17 @@ use xactor::Addr;
 use crate::DataStoreBuffer;
 use crate::actors::Getn;
 
-use std::sync::Arc;
+//use std::sync::Arc;
 
 #[derive(Clone)]
 struct State {
-    actor: Arc<Addr<DataStoreBuffer>>,
+    actor: Addr<DataStoreBuffer>,
 }
 
 impl State {
     fn new(actor: Addr<DataStoreBuffer>) -> Self {
         Self {
-            actor: Arc::new(actor),
+            actor,
         }
     }
 }
@@ -28,6 +28,8 @@ pub async fn run_server(ds_actor: Addr<DataStoreBuffer>) -> tide::Result<()> {
     Ok(())
 }
 
+// TODO: need to output JSON instead
+
 async fn get_tail(req: tide::Request<State>) -> tide::Result<String> {
     let n: usize = req.param("num")?.parse().unwrap_or(0);
     let mut res = String::from("period start,symbol,price,change %,min,max,30d avg\n");
@@ -39,3 +41,4 @@ async fn get_tail(req: tide::Request<State>) -> tide::Result<String> {
     res += &data.join("\n");
     Ok(res)
 }
+
