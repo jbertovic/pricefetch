@@ -2,6 +2,7 @@ pub mod calc;
 pub mod actors;
 pub mod utility;
 pub mod server;
+pub mod datastamp;
 
 use chrono::{DateTime, Utc};
 use std::time::Duration;
@@ -11,8 +12,11 @@ use xactor::*;
 use actors::{DataWriterCsv, DataWriterStdout, QuoteRequest, QuoteRouter, StockDataProcessor, DataStoreBuffer};
 use server::run_server;
 
-const BUFFER_SIZE: usize = 5_000;
+// move visibility to front of crate
+use datastamp::DataStamp;
+use datastamp::DATA_HEADER;
 
+const BUFFER_SIZE: usize = 5_000;
 
 pub fn run_program(symbols: Vec<String>, from: String, pool_num: String, file_name: Option<String>, server: bool) -> Result<()> {
 

@@ -1,6 +1,7 @@
 use xactor::Addr;
 use crate::DataStoreBuffer;
 use crate::actors::Getn;
+use crate::DATA_HEADER;
 
 //use std::sync::Arc;
 
@@ -32,13 +33,15 @@ pub async fn run_server(ds_actor: Addr<DataStoreBuffer>) -> tide::Result<()> {
 
 async fn get_tail(req: tide::Request<State>) -> tide::Result<String> {
     let n: usize = req.param("num")?.parse().unwrap_or(0);
-    let mut res = String::from("period start,symbol,price,change %,min,max,30d avg\n");
+    let mut res = String::from(format!("{}\n",DATA_HEADER));
     let mut data = req.state().actor.call(Getn(n)).await.unwrap();
     if let Some(sym) = req.url().query() {
         let symbol: Vec<&str> = sym.split("=").collect();
-        data = data.into_iter().filter(|l| l.contains(symbol[1])).collect();
+        if symbol.len() > 1 {
+            data = data.into_iter().filter(|ds| ds.get_symbol().contains(symbol[1])).collect();
+        }
     }
-    res += &data.join("\n");
+    res += &data.into_iter().fold(String::new(), |acc, ds| acc+format!("{}\n",ds).as_str());
     Ok(res)
 }
 

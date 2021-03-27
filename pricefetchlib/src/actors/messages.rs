@@ -1,9 +1,10 @@
+use crate::DataStamp;
 use chrono::{DateTime, Utc};
 use xactor::*;
 use yahoo_finance_api as yahoo;
 
 #[message]
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Quotes {
     pub symbol: String,
     pub from: DateTime<Utc>,
@@ -11,17 +12,17 @@ pub struct Quotes {
 }
 
 #[message]
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct QuoteRequest {
     pub symbol: String,
     pub start: DateTime<Utc>,
     pub end: DateTime<Utc>,
 }
 
-#[message]
-#[derive(Debug, Clone)]
-pub struct Output(pub String);
-
-#[message(result = "Vec<String>")]
-#[derive(Debug, Clone)]
+#[message(result = "Vec<DataStamp>")]
+#[derive(Clone)]
 pub struct Getn(pub usize);
+
+#[message]
+#[derive(Clone)]
+pub struct TimeStamp(pub DataStamp);

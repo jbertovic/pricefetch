@@ -1,16 +1,17 @@
 use async_std::{fs::File, io::{BufWriter, prelude::WriteExt}};
 use async_trait::async_trait;
 use xactor::*;
-use super::Output;
+use crate::DATA_HEADER;
+use super::TimeStamp;
 
 /// DataWriterStdout
 /// Start - subscribed to <Output>
-/// <Output>
+/// <TimeStamp>
 /// - write to stdout
 /// 
 /// DataWriterCSV
 /// Start - subscribed to <Output>
-/// <Output>
+/// <TimeStamp>
 /// - write to csv file
 /// 
 
@@ -19,16 +20,15 @@ pub struct DataWriterStdout;
 #[async_trait]
 impl Actor for DataWriterStdout {
     async fn started(&mut self, ctx: &mut Context<Self>) -> Result<()> {
-        // optional: do stuff on handler startup, like subscribing to a Broker
-        ctx.subscribe::<Output>().await?;
-        println!("period start,symbol,price,change %,min,max,30d avg");
+        ctx.subscribe::<TimeStamp>().await?;
+        println!("{}", DATA_HEADER);
         Ok(())
     }
 }
 
 #[async_trait]
-impl Handler<Output> for DataWriterStdout {
-    async fn handle(&mut self, _ctx: &mut Context<Self>, msg: Output) {
+impl Handler<TimeStamp> for DataWriterStdout {
+    async fn handle(&mut self, _ctx: &mut Context<Self>, msg: TimeStamp) {
         println!("{}", msg.0);
     }
 }
@@ -48,16 +48,15 @@ impl DataWriterCsv {
 #[async_trait]
 impl Actor for DataWriterCsv {
     async fn started(&mut self, ctx: &mut Context<Self>) -> Result<()> {
-        // optional: do stuff on handler startup, like subscribing to a Broker
-        ctx.subscribe::<Output>().await?;
-        self.writer.write(b"period start,symbol,price,change %,min,max,30d avg\n").await?;
+        ctx.subscribe::<TimeStamp>().await?;
+        self.writer.write(format!("{}\n", DATA_HEADER).as_bytes()).await?;
         Ok(())
     }
 }
 
 #[async_trait]
-impl Handler<Output> for DataWriterCsv {
-    async fn handle(&mut self, _ctx: &mut Context<Self>, msg: Output) {
+impl Handler<TimeStamp> for DataWriterCsv {
+    async fn handle(&mut self, _ctx: &mut Context<Self>, msg: TimeStamp) {
         self.writer.write(format!("{}\n", msg.0).as_bytes()).await.unwrap();
         self.writer.flush().await.unwrap();
     }
