@@ -3,7 +3,7 @@ Following along with a project on LiveProject.manning.com (Building a stock trad
 This is my code while participating in the project.
 
 Finished Milestone 2 - Mar 14, 2021 - added intervals and actors to retrieve quotes and procss data.
-Finished Milestone 3 - Mar 22, 2021 - split into workspaces (cli / library) and added benchmarks
+Finished Milestone 3 - Mar 22, 2021 - split into workspaces (cli / library) and added benchmarks.
 Finished Milestone 4 - Mar 27, 2021 - added csv output, added server component and refactored a datastamp struct
 
 
