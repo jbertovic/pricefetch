@@ -1,4 +1,4 @@
-use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc, ParseError};
+use chrono::{DateTime, NaiveDate, NaiveDateTime, ParseError, Utc};
 
 pub fn date_parse(date_str: &str) -> Result<DateTime<Utc>, ParseError> {
     // From string to a NaiveDate

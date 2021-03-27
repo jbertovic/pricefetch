@@ -1,7 +1,7 @@
 name: pricetracker
-version: "0.3"
+version: "0.4"
 author: Jas B. <jas@bertovic.net>
-about: LiveProject on Manning.com - simple tracker - Milestone 3.0
+about: LiveProject on Manning.com - simple tracker - Milestone 4.0
 args:
     - from:
         short: f
@@ -17,3 +17,21 @@ args:
         multiple: true
         use_delimiter: true
         takes_value: true
+    - csv:
+        short: c
+        long: csv
+        help: name of file to output csv format
+        required: false
+        takes_value: true
+    - server:
+        short: x
+        long: server
+        help: starts server on localhost port 8080
+        required: false
+    - pool:
+        short: p
+        long: pool
+        help: number of downloader actors
+        takes_value: true
+        default_value: "5"
+
