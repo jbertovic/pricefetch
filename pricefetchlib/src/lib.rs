@@ -5,7 +5,7 @@ pub mod server;
 pub mod datastamp;
 
 use chrono::{DateTime, Utc};
-use std::time::Duration;
+use std::{time::Duration, usize};
 use async_std::{fs::File, io::BufWriter, prelude::*, task};
 use async_std::stream;
 use xactor::*;
@@ -17,6 +17,7 @@ use datastamp::DataStamp;
 use datastamp::DATA_HEADER;
 
 const BUFFER_SIZE: usize = 5_000;
+const INTERVAL_SEC: usize = 30;
 
 pub fn run_program(symbols: Vec<String>, from: String, pool_num: String, file_name: Option<String>, server: bool) -> Result<()> {
 
@@ -53,7 +54,7 @@ pub fn run_program(symbols: Vec<String>, from: String, pool_num: String, file_na
         
             let mut symbroker: Addr<Broker<QuoteRequest>> = Broker::from_registry().await.unwrap();
         
-            let mut interval = stream::interval(Duration::from_secs(10));
+            let mut interval = stream::interval(Duration::from_secs(INTERVAL_SEC as u64));
         
             while let Some(_) = interval.next().await {
                 let to_date: DateTime<Utc> = Utc::now();

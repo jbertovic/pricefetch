@@ -1650,6 +1650,7 @@ dependencies = [
  "chrono",
  "criterion",
  "rand 0.8.3",
+ "serde",
  "tide",
  "xactor",
  "yahoo_finance_api",
